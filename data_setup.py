@@ -32,5 +32,9 @@ if __name__ == "__main__":
     random.seed(42)
     source = 'dataset'
     output = 'data_split'
+    
+    if os.path.exists(output):
+        shutil.rmtree(output)
+        
     split_dataset(source, output)
     print("Dataset split complete.")
