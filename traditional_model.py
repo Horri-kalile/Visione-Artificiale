@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from features import get_combined_features
 from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
 
 def load_data_and_extract_features(data_dir):
     classes = sorted(os.listdir(data_dir))
@@ -26,6 +27,16 @@ if __name__ == "__main__":
     X_train, y_train, classes = load_data_and_extract_features('data_split/train')
     print(f"Training set: {X_train.shape}")
 
+    print("Loading validation data and extracting features...")
+    X_val, y_val, _ = load_data_and_extract_features('data_split/val')
+    print(f"Validation set: {X_val.shape}")
+
     print("Training SVM classifier...")
     clf = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True)
     clf.fit(X_train, y_train)
+
+    y_pred = clf.predict(X_val)
+    acc = accuracy_score(y_val, y_pred)
+    print(f"Validation Accuracy: {acc:.4f}")
+    print("\nClassification Report:")
+    print(classification_report(y_val, y_pred, target_names=classes))
