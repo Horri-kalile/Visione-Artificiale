@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 from features import get_combined_features
+from sklearn.svm import SVC
 
 def load_data_and_extract_features(data_dir):
     classes = sorted(os.listdir(data_dir))
@@ -19,3 +20,12 @@ def load_data_and_extract_features(data_dir):
                 labels_list.append(idx)
 
     return np.array(features_list), np.array(labels_list), classes
+
+if __name__ == "__main__":
+    print("Loading training data and extracting features...")
+    X_train, y_train, classes = load_data_and_extract_features('data_split/train')
+    print(f"Training set: {X_train.shape}")
+
+    print("Training SVM classifier...")
+    clf = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True)
+    clf.fit(X_train, y_train)
