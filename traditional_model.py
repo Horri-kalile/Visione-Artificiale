@@ -4,6 +4,7 @@ import numpy as np
 from features import get_combined_features
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report
+import joblib
 
 def load_data_and_extract_features(data_dir):
     classes = sorted(os.listdir(data_dir))
@@ -40,3 +41,9 @@ if __name__ == "__main__":
     print(f"Validation Accuracy: {acc:.4f}")
     print("\nClassification Report:")
     print(classification_report(y_val, y_pred, target_names=classes))
+
+    # Save the model
+    os.makedirs('models', exist_ok=True)
+    joblib.dump(clf, 'models/traditional_svm.joblib')
+    joblib.dump(classes, 'models/classes.joblib')
+    print("Model saved to models/traditional_svm.joblib")
