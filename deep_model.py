@@ -1,6 +1,8 @@
 import torch
 from torchvision import datasets, transforms
 import os
+import torch.nn as nn
+from torchvision import models
 
 data_transforms = {
     'train': transforms.Compose([
@@ -26,3 +28,14 @@ dataloaders = {
     x: torch.utils.data.DataLoader(image_datasets[x], batch_size=32, shuffle=True, num_workers=0)
     for x in ['train', 'val']
 }
+
+class_names = image_datasets['train'].classes
+num_classes = len(class_names)
+
+model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
+
+for param in model.parameters():
+    param.requires_grad = False
+
+num_ftrs = model.classifier[1].in_features
+model.classifier[1] = nn.Linear(num_ftrs, num_classes)
