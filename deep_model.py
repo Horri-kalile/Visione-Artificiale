@@ -3,6 +3,8 @@ from torchvision import datasets, transforms
 import os
 import torch.nn as nn
 from torchvision import models
+import copy
+import torch.optim as optim
 
 data_transforms = {
     'train': transforms.Compose([
@@ -39,3 +41,17 @@ for param in model.parameters():
 
 num_ftrs = model.classifier[1].in_features
 model.classifier[1] = nn.Linear(num_ftrs, num_classes)
+
+def train_model(model, dataloaders, criterion, optimizer, num_epochs=25):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+
+    best_model_wts = copy.deepcopy(model.state_dict())
+    best_acc = 0.0
+
+
+    model.load_state_dict(best_model_wts)
+    return model
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.classifier[1].parameters(), lr=0.001)
