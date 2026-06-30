@@ -6,52 +6,6 @@ from torchvision import models
 import copy
 import torch.optim as optim
 
-if __name__ == "__main__":
-    data_transforms = {
-        'train': transforms.Compose([
-            transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ]),
-        'val': transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-        ]),
-    }
-    data_dir = 'data_split'
-    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
-                      for x in ['train', 'val']}
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=32,
-                                                 shuffle=True, num_workers=0)
-                   for x in ['train', 'val']}
-    
-    class_names = image_datasets['train'].classes
-    num_classes = len(class_names)
-    
-    # Load pre-trained MobileNetV2 (Slide 11: Transfer Learning)
-    model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
-    
-    # Freeze initial layers
-    for param in model.parameters():
-        param.requires_grad = False
-        
-    # Replace the classifier (Slide 11: Fine-tuning)
-    num_ftrs = model.classifier[1].in_features
-    model.classifier[1] = nn.Linear(num_ftrs, num_classes)
-   
-    criterion = nn.CrossEntropyLoss()
-    # Only optimize parameters of the classifier
-    optimizer = optim.Adam(model.classifier[1].parameters(), lr=0.001)
-    
-    print("Starting Deep Learning training (Transfer Learning)...")
-    model = train_model(model, dataloaders, criterion, optimizer, num_epochs=10)
-    
-    os.makedirs('models', exist_ok=True)
-    torch.save(model.state_dict(), 'models/deep_mobilenet.pth')
-    print("Model saved to models/deep_mobilenet.pth")
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs=25):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -107,3 +61,50 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs=25):
     model.load_state_dict(best_model_wts)
     return model
 
+
+if __name__ == "__main__":
+    data_transforms = {
+        'train': transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ]),
+        'val': transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ]),
+    }
+    data_dir = 'data_split'
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x), data_transforms[x])
+                      for x in ['train', 'val']}
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=32,
+                                                 shuffle=True, num_workers=0)
+                   for x in ['train', 'val']}
+    
+    class_names = image_datasets['train'].classes
+    num_classes = len(class_names)
+    
+    # Load pre-trained MobileNetV2 (Slide 11: Transfer Learning)
+    model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
+    
+    # Freeze initial layers
+    for param in model.parameters():
+        param.requires_grad = False
+        
+    # Replace the classifier (Slide 11: Fine-tuning)
+    num_ftrs = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(num_ftrs, num_classes)
+   
+    criterion = nn.CrossEntropyLoss()
+    # Only optimize parameters of the classifier
+    optimizer = optim.Adam(model.classifier[1].parameters(), lr=0.001)
+    
+    print("Starting Deep Learning training (Transfer Learning)...")
+    model = train_model(model, dataloaders, criterion, optimizer, num_epochs=10)
+    
+    os.makedirs('models', exist_ok=True)
+    torch.save(model.state_dict(), 'models/deep_mobilenet.pth')
+    print("Model saved to models/deep_mobilenet.pth")
