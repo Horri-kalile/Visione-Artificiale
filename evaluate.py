@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 from torchvision import models, transforms
 from PIL import Image
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 
 def load_traditional_model():
     clf = joblib.load('models/traditional_svm.joblib')
@@ -67,3 +68,39 @@ def evaluate_deep(test_dir, model, classes):
                 y_true.append(idx)
 
     return np.array(y_true), np.array(y_pred)
+
+if __name__ == "__main__":
+    test_dir = 'data_split/test'
+    clf, classes = load_traditional_model()
+    deep_model = load_deep_model(len(classes))
+    
+    print("Evaluating Traditional Approach...")
+    y_true_trad, y_pred_trad = evaluate_traditional(test_dir, clf, classes)
+    
+    print("Evaluating Deep Learning Approach...")
+    y_true_deep, y_pred_deep = evaluate_deep(test_dir, deep_model, classes)
+    
+    # Print basic results to console
+    print("\n--- TRADITIONAL RESULTS ---")
+    print(f"Accuracy: {accuracy_score(y_true_trad, y_pred_trad):.4f}")
+    print("Confusion Matrix:\n", confusion_matrix(y_true_trad, y_pred_trad))
+    
+    print("\n--- DEEP LEARNING RESULTS ---")
+    print(f"Accuracy: {accuracy_score(y_true_deep, y_pred_deep):.4f}")
+    print("Confusion Matrix:\n", confusion_matrix(y_true_deep, y_pred_deep))
+    
+    # Save only the raw metrics to a file
+    with open('evaluation_report.txt', 'w') as f:
+        f.write("=== EVALUATION METRICS ===\n\n")
+        
+        f.write("1. TRADITIONAL APPROACH\n")
+        f.write(f"Accuracy: {accuracy_score(y_true_trad, y_pred_trad):.4f}\n")
+        f.write("\nClassification Report:\n")
+        f.write(classification_report(y_true_trad, y_pred_trad, target_names=classes))
+        
+        f.write("\n\n2. DEEP LEARNING APPROACH\n")
+        f.write(f"Accuracy: {accuracy_score(y_true_deep, y_pred_deep):.4f}\n")
+        f.write("\nClassification Report:\n")
+        f.write(classification_report(y_true_deep, y_pred_deep, target_names=classes))
+        
+    print("\nMetrics saved to evaluation_report.txt")
