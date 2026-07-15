@@ -12,9 +12,10 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 def load_traditional_model():
     clf = joblib.load('models/traditional_svm.joblib')
     classes = joblib.load('models/classes.joblib')
-    return clf, classes
+    scaler = joblib.load('models/scaler.joblib')  
+    return clf, classes, scaler  
 
-def evaluate_traditional(test_dir, clf, classes):
+def evaluate_traditional(test_dir, clf, classes, scaler):  
     X_test = []
     y_true = []
 
@@ -30,6 +31,11 @@ def evaluate_traditional(test_dir, clf, classes):
 
     X_test = np.array(X_test)
     y_true = np.array(y_true)
+    
+    
+    X_test = scaler.transform(X_test)
+    
+    
     y_pred = clf.predict(X_test)
     return y_true, y_pred
 
@@ -71,11 +77,11 @@ def evaluate_deep(test_dir, model, classes):
 
 if __name__ == "__main__":
     test_dir = 'data_split/test'
-    clf, classes = load_traditional_model()
+    clf, classes, scaler = load_traditional_model()  
     deep_model = load_deep_model(len(classes))
     
     print("Evaluating Traditional Approach...")
-    y_true_trad, y_pred_trad = evaluate_traditional(test_dir, clf, classes)
+    y_true_trad, y_pred_trad = evaluate_traditional(test_dir, clf, classes, scaler)  
     
     print("Evaluating Deep Learning Approach...")
     y_true_deep, y_pred_deep = evaluate_deep(test_dir, deep_model, classes)

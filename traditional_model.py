@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from features import get_combined_features
 from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
 
@@ -32,6 +33,13 @@ if __name__ == "__main__":
     X_val, y_val, _ = load_data_and_extract_features('data_split/val')
     print(f"Validation set: {X_val.shape}")
 
+   
+    print("Standardizing features...")
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_val = scaler.transform(X_val)
+    
+
     print("Training SVM classifier...")
     clf = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True)
     clf.fit(X_train, y_train)
@@ -46,4 +54,5 @@ if __name__ == "__main__":
     os.makedirs('models', exist_ok=True)
     joblib.dump(clf, 'models/traditional_svm.joblib')
     joblib.dump(classes, 'models/classes.joblib')
+    joblib.dump(scaler, 'models/scaler.joblib')  
     print("Model saved to models/traditional_svm.joblib")

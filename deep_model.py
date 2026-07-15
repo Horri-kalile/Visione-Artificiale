@@ -87,14 +87,14 @@ if __name__ == "__main__":
     class_names = image_datasets['train'].classes
     num_classes = len(class_names)
     
-    # Load pre-trained MobileNetV2 (Slide 11: Transfer Learning)
+    # Load pre-trained MobileNetV2 
     model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
     
     # Freeze initial layers
     for param in model.parameters():
         param.requires_grad = False
         
-    # Replace the classifier (Slide 11: Fine-tuning)
+    # Replace the classifier 
     num_ftrs = model.classifier[1].in_features
     model.classifier[1] = nn.Linear(num_ftrs, num_classes)
    
